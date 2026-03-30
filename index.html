@@ -79,6 +79,17 @@ body::before {
   white-space:nowrap; overflow:hidden;
 }
 .header-icon { font-size:40px; display:block; margin-bottom:8px; animation: bounce 2s infinite; }
+.header-chars { margin-bottom:10px; }
+.char-img { height:90px; image-rendering:pixelated; border-radius:4px; }
+.guild-tag {
+  display:inline-block;
+  font-family:'Press Start 2P'; font-size:8px;
+  color:#c026a0; background:#fce7f3;
+  border:2px solid #f9a8d4;
+  padding:5px 12px; border-radius:2px;
+  margin:6px 0 4px;
+  letter-spacing:1px;
+}
 @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
 
 .header h1 {
@@ -354,8 +365,11 @@ input::placeholder { color: #d4a0b8; }
 
   <!-- HEADER -->
   <div class="header">
-    <span class="header-icon">🍄</span>
+    <div class="header-chars">
+      <img src="data:image/jpeg;base64,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" alt="茱麗葉與羅密歐" class="char-img">
+    </div>
     <h1>Romeo & Juliet PQ<br>跳台協作工具</h1>
+    <p class="guild-tag">⚔️ GoToHell 公會製作</p>
     <p>楓之谷 Artale · 多人即時同步</p>
     <div class="online-badge" id="online-badge">🌐 連線中...</div>
     <div class="deco-strip">🌸🌷🌼🍄🌸🌷🌼🍄🌸🌷🌼🍄🌸🌷🌼🍄🌸🌷🌼🍄🌸🌷🌼🍄🌸🌷🌼🍄🌸🌷🌼🍄</div>
@@ -374,8 +388,8 @@ input::placeholder { color: #d4a0b8; }
     <div class="pbox" style="padding:20px">
       <div class="section-title">🏠 建立房間</div>
       <div class="input-row">
-        <input type="text" id="create-room-id" placeholder="房間代碼（留空自動產生）" maxlength="8">
-        <input type="password" id="create-room-pw" placeholder="密碼（可選）" maxlength="16">
+        <input type="text" id="create-room-id" placeholder="房間代碼（4碼）" maxlength="4">
+        <input type="password" id="create-room-pw" placeholder="密碼（4碼，可選）" maxlength="4">
         <button class="btn btn-yellow" onclick="createRoom()">建立房間</button>
       </div>
     </div>
@@ -383,8 +397,8 @@ input::placeholder { color: #d4a0b8; }
     <div class="pbox" style="padding:20px">
       <div class="section-title">🚪 加入房間</div>
       <div class="input-row">
-        <input type="text" id="join-room-id" placeholder="房間代碼" maxlength="8">
-        <input type="password" id="join-room-pw" placeholder="密碼（若有）" maxlength="16">
+        <input type="text" id="join-room-id" placeholder="房間代碼（4碼）" maxlength="4">
+        <input type="password" id="join-room-pw" placeholder="密碼（若有）" maxlength="4">
         <button class="btn btn-blue" onclick="joinRoom()">加入</button>
       </div>
     </div>
@@ -411,8 +425,6 @@ input::placeholder { color: #d4a0b8; }
     <!-- Tabs -->
     <div class="tabs">
       <div class="tab active" onclick="switchTab('map')">🗺️ 地圖標記</div>
-      <div class="tab" onclick="switchTab('overview')">📋 路線總覽</div>
-      <div class="tab" onclick="switchTab('log')">📜 系統日誌</div>
     </div>
 
     <!-- Map tab -->
@@ -441,23 +453,6 @@ input::placeholder { color: #d4a0b8; }
         <div class="legend-item"><div class="legend-dot" style="background:#fbbf2422;border-color:#fbbf24"></div>玩家3</div>
         <div class="legend-item"><div class="legend-dot" style="background:#60a5fa22;border-color:#60a5fa"></div>玩家4</div>
         <div class="legend-item" style="margin-left:auto;font-size:11px;color:var(--muted)">左鍵=通路 ✓ | 右鍵=死路 ✕</div>
-      </div>
-    </div>
-
-    <!-- Overview tab -->
-    <div id="tab-overview" class="hidden">
-      <div class="pbox" style="padding:16px;">
-        <div class="section-title">📋 路線總覽</div>
-        <p style="font-size:12px;color:var(--muted);margin-bottom:14px;">根據目前標記自動推導每位成員的通關路線，點擊數字可複製整條路線。</p>
-        <div id="overview-content"></div>
-      </div>
-    </div>
-
-    <!-- Log tab -->
-    <div id="tab-log" class="hidden">
-      <div class="pbox" style="padding:16px;">
-        <div class="section-title">📜 系統日誌</div>
-        <div class="log-box" id="log-box"><p>系統初始化...</p></div>
       </div>
     </div>
 
@@ -522,15 +517,14 @@ function log(msg) {
   box.scrollTop = box.scrollHeight;
 }
 function switchTab(name) {
-  ['map','overview','log'].forEach(n=>{
+  ['map'].forEach(n=>{
     document.getElementById('tab-'+n).classList.toggle('hidden', n!==name);
   });
   document.querySelectorAll('.tab').forEach((t,i)=>{
-    t.classList.toggle('active', ['map','overview','log'][i]===name);
+    t.classList.toggle('active', ['map'][i]===name);
   });
-  if (name==='overview') renderOverview();
 }
-
+function log(msg) { console.log(msg); }
 // ── NICKNAME ─────────────────────────────────────────────
 window.modalSetNickname = function() {
   const v = document.getElementById('modal-nickname').value.trim();
