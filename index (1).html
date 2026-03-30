@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🍄 羅朱跳台協作工具</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+TC:wght@400;500;700&display=swap');
+
+:root {
+  --pink:    #f472b6;
+  --pink2:   #fba8d0;
+  --yellow:  #fde68a;
+  --green:   #6ee7b7;
+  --blue:    #93c5fd;
+  --purple:  #f9a8d4;
+  --bg:      #fff0f6;
+  --bg2:     #ffe4f0;
+  --bg3:     #ffd6e8;
+  --border:  #f9a8d4;
+  --text:    #5c2d4a;
+  --muted:   #b06080;
+  --shadow:  #f0b8d0;
+  --p1: #f472b6; --p2: #34d399; --p3: #fbbf24; --p4: #60a5fa;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; image-rendering:pixelated; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans TC', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* spring flower bg */
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background-image:
+    radial-gradient(3px 3px at 8%  15%, #f472b655 0%, transparent 100%),
+    radial-gradient(2px 2px at 25% 65%, #fde68a66 0%, transparent 100%),
+    radial-gradient(3px 3px at 50% 10%, #6ee7b744 0%, transparent 100%),
+    radial-gradient(2px 2px at 72% 50%, #f9a8d455 0%, transparent 100%),
+    radial-gradient(3px 3px at 88% 25%, #fde68a55 0%, transparent 100%),
+    radial-gradient(2px 2px at 18% 80%, #6ee7b744 0%, transparent 100%),
+    radial-gradient(3px 3px at 62% 88%, #f472b644 0%, transparent 100%),
+    radial-gradient(2px 2px at 40% 40%, #fde68a44 0%, transparent 100%);
+  pointer-events:none; z-index:0;
+}
+
+.wrap { position:relative; z-index:1; max-width:860px; margin:0 auto; padding:24px 16px 80px; }
+
+/* pixel border mixin */
+.pbox {
+  background: #fff8fb;
+  border: 3px solid var(--border);
+  box-shadow: 4px 4px 0 var(--shadow), inset 0 0 0 1px #f472b618;
+  border-radius: 4px;
+}
+
+/* HEADER */
+.header {
+  text-align:center;
+  padding: 32px 20px 24px;
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, #fff0f6 0%, #fce7f3 50%, #f0fdf4 100%);
+  border: 3px solid var(--pink);
+  box-shadow: 6px 6px 0 var(--shadow), 0 0 40px #f472b622;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+}
+.header::before {
+  content:'🌸 🌷 🌼 🌸 🌷 🌼 🌸 🌷 🌼 🌸 🌷 🌼 🌸 🌷 🌼';
+  position:absolute; top:6px; left:0; right:0;
+  font-size:10px; color:#f472b688; letter-spacing:2px;
+  white-space:nowrap; overflow:hidden;
+}
+.header-icon { font-size:40px; display:block; margin-bottom:8px; animation: bounce 2s infinite; }
+@keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+
+.header h1 {
+  font-family:'Press Start 2P', monospace;
+  font-size:13px;
+  color: #d946a8;
+  text-shadow: 2px 2px 0 #f9a8d4, 0 0 20px #f472b666;
+  line-height: 1.8;
+  margin-bottom: 6px;
+}
+.header p { font-size:12px; color:var(--muted); }
+.online-badge {
+  display:inline-block; margin-top:10px;
+  background: #fff; border:2px solid var(--green);
+  padding:4px 12px; border-radius:2px;
+  font-family:'Press Start 2P'; font-size:8px; color:#059669;
+}
+
+/* LOBBY */
+#lobby { display:flex; flex-direction:column; gap:16px; }
+
+.section-title {
+  font-family:'Press Start 2P'; font-size:9px;
+  color:#c026a0; margin-bottom:12px;
+  display:flex; align-items:center; gap:8px;
+}
+.section-title::after { content:''; flex:1; height:2px; background:linear-gradient(90deg,#f9a8d4,transparent); }
+
+.input-row { display:flex; gap:8px; flex-wrap:wrap; }
+
+input[type=text], input[type=password] {
+  flex:1; min-width:120px;
+  background: #fff;
+  border: 2px solid var(--border);
+  color: var(--text);
+  padding: 10px 12px;
+  font-family: 'Noto Sans TC'; font-size:14px;
+  border-radius: 2px;
+  outline: none;
+  box-shadow: inset 2px 2px 0 #f9a8d430;
+  transition: border-color .2s;
+}
+input:focus { border-color: var(--pink); }
+input::placeholder { color: #d4a0b8; }
+
+.btn {
+  padding: 10px 18px;
+  font-family: 'Press Start 2P'; font-size:9px;
+  border: 2px solid; border-radius: 2px;
+  cursor: pointer; transition: transform .1s, box-shadow .1s;
+  box-shadow: 3px 3px 0 var(--shadow);
+  white-space: nowrap;
+}
+.btn:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 var(--shadow); }
+.btn-pink  { background:#ff6b9d22; border-color:var(--pink);   color:var(--pink); }
+.btn-pink:hover  { background:#ff6b9d44; }
+.btn-yellow{ background:#ffe06622; border-color:var(--yellow); color:var(--yellow); }
+.btn-yellow:hover{ background:#ffe06644; }
+.btn-blue  { background:#6bb5ff22; border-color:var(--blue);   color:var(--blue); }
+.btn-blue:hover  { background:#6bb5ff44; }
+.btn-green { background:#6bdd8e22; border-color:var(--green);  color:var(--green); }
+.btn-green:hover { background:#6bdd8e44; }
+.btn-red   { background:#ff6b6b22; border-color:#ff6b6b;       color:#ff6b6b; }
+.btn-red:hover   { background:#ff6b6b44; }
+.btn-sm { padding:6px 12px; font-size:7px; }
+
+/* ROOM INFO */
+.room-info-bar {
+  display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+  padding:12px 16px;
+  background:#fff8fb; border:2px solid var(--border);
+  border-radius:2px; margin-bottom:16px;
+  box-shadow: 3px 3px 0 var(--shadow);
+}
+.room-code {
+  font-family:'Press Start 2P'; font-size:10px;
+  color:#c026a0; background:#fce7f3;
+  padding:6px 12px; border:2px solid #f9a8d4;
+  border-radius:2px; cursor:pointer;
+  transition: background .2s;
+}
+.room-code:hover { background:#ffd6e8; }
+
+/* MEMBERS */
+.members-grid {
+  display:grid; grid-template-columns:repeat(2,1fr); gap:10px;
+  margin-bottom:16px;
+}
+@media(max-width:480px){ .members-grid{grid-template-columns:1fr;} }
+
+.member-card {
+  padding:12px 14px;
+  background:#fff; border:2px solid var(--border);
+  border-radius:2px; box-shadow:3px 3px 0 var(--shadow);
+  display:flex; align-items:center; gap:10px;
+  transition: border-color .2s;
+}
+.member-card.me { border-color:var(--pink); background:#fff0f6; }
+.member-avatar {
+  width:36px; height:36px;
+  border:2px solid currentColor;
+  border-radius:2px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:18px; flex-shrink:0;
+  background:#ffffff0a;
+}
+.member-info { flex:1; min-width:0; }
+.member-name { font-size:13px; font-weight:700; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.member-role { font-family:'Press Start 2P'; font-size:7px; color:var(--muted); margin-top:3px; }
+.member-slot { font-family:'Press Start 2P'; font-size:8px; color:var(--muted); }
+
+/* MAP GRID */
+.map-wrap { margin-bottom:20px; }
+.map-header {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:12px;
+}
+.floor-labels {
+  display:flex; flex-direction:column; gap:6px;
+  margin-right:8px;
+}
+.floor-label {
+  font-family:'Press Start 2P'; font-size:7px;
+  color:var(--muted); text-align:right;
+  height:52px; display:flex; align-items:center; justify-content:flex-end;
+}
+.grid-area { flex:1; }
+.grid-row {
+  display:grid; grid-template-columns:repeat(4,1fr); gap:6px;
+  margin-bottom:6px;
+}
+.cell {
+  height:52px;
+  background:#fff;
+  border:2px solid #f9a8d4;
+  border-radius:2px;
+  cursor:pointer;
+  position:relative;
+  overflow:hidden;
+  transition: border-color .15s, transform .1s;
+  box-shadow: 2px 2px 0 var(--shadow);
+  display:flex; align-items:center; justify-content:center;
+  flex-direction:column; gap:2px;
+}
+.cell:hover { border-color:var(--pink); transform:translateY(-1px); }
+.cell.marked { border-width:3px; }
+.cell-mark {
+  font-family:'Press Start 2P'; font-size:14px;
+  line-height:1;
+}
+.cell-name {
+  font-size:9px; color:#ffffffaa;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  max-width:90%;
+}
+.cell-dots {
+  position:absolute; bottom:3px; right:3px;
+  display:flex; gap:2px;
+}
+.cell-dot { width:6px; height:6px; border-radius:1px; }
+
+/* col headers */
+.col-headers {
+  display:grid; grid-template-columns:repeat(4,1fr); gap:6px;
+  margin-bottom:6px;
+}
+.col-header {
+  text-align:center;
+  font-family:'Press Start 2P'; font-size:7px; color:var(--muted);
+  padding:4px 0;
+}
+
+/* LEGEND */
+.legend {
+  display:flex; gap:12px; flex-wrap:wrap;
+  padding:12px 16px;
+  background:#fff8fb; border:2px solid var(--border);
+  border-radius:2px; margin-bottom:16px;
+}
+.legend-item { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--muted); }
+.legend-dot { width:14px; height:14px; border-radius:2px; border:2px solid; }
+
+/* LOG */
+.log-box {
+  background:#fff; border:2px solid var(--border);
+  border-radius:2px; padding:10px 14px;
+  height:100px; overflow-y:auto;
+  font-size:11px; color:var(--muted);
+  font-family:monospace;
+  box-shadow: inset 2px 2px 0 #f9a8d420;
+}
+.log-box p { margin-bottom:4px; }
+.log-box p:last-child { color:var(--text); }
+
+/* OVERVIEW */
+.overview-btn-wrap { margin-bottom:16px; display:flex; gap:8px; flex-wrap:wrap; }
+.overview-table { width:100%; border-collapse:collapse; font-size:12px; }
+.overview-table th {
+  font-family:'Press Start 2P'; font-size:7px;
+  padding:8px 10px; text-align:left;
+  background:#fce7f3; border:1px solid var(--border);
+  color:var(--muted);
+}
+.overview-table td {
+  padding:8px 10px; border:1px solid var(--border);
+  background:#fff8fb;
+}
+.route-cell { display:flex; gap:4px; flex-wrap:wrap; }
+.route-num {
+  font-family:'Press Start 2P'; font-size:9px;
+  padding:4px 8px; border-radius:2px; border:2px solid;
+  cursor:pointer; transition:background .15s;
+}
+
+/* TOAST */
+.toast {
+  position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px);
+  background:#fff; border:2px solid var(--green);
+  color:#059669; padding:10px 20px;
+  font-family:'Press Start 2P'; font-size:9px;
+  border-radius:2px; box-shadow:4px 4px 0 var(--shadow);
+  transition:transform .35s cubic-bezier(.34,1.56,.64,1);
+  z-index:999; white-space:nowrap;
+}
+.toast.show { transform:translateX(-50%) translateY(0); }
+
+/* MODAL */
+.modal-bg {
+  position:fixed; inset:0; background:#00000088;
+  display:flex; align-items:center; justify-content:center;
+  z-index:100; padding:16px;
+}
+.modal {
+  background:linear-gradient(135deg,#fff0f6,#f0fdf4); border:3px solid var(--pink);
+  box-shadow:6px 6px 0 var(--shadow);
+  border-radius:4px; padding:28px 24px;
+  max-width:360px; width:100%; text-align:center;
+}
+.modal h2 { font-family:'Press Start 2P'; font-size:11px; color:#c026a0; margin-bottom:20px; line-height:1.8; }
+
+/* Pixel mushroom deco */
+.deco-strip {
+  display:flex; justify-content:center; gap:16px;
+  font-size:22px; margin:8px 0 0;
+  animation: slide 20s linear infinite;
+  white-space:nowrap; overflow:hidden;
+}
+@keyframes slide { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+/* scrollbar */
+::-webkit-scrollbar { width:6px; }
+::-webkit-scrollbar-track { background:#fce7f3; }
+::-webkit-scrollbar-thumb { background:#f9a8d4; border-radius:2px; }
+
+/* hidden */
+.hidden { display:none !important; }
+
+/* tabs */
+.tabs { display:flex; gap:6px; margin-bottom:16px; }
+.tab {
+  font-family:'Press Start 2P'; font-size:8px;
+  padding:8px 14px; border:2px solid var(--border);
+  background:#fff; color:var(--muted);
+  cursor:pointer; border-radius:2px;
+  transition:all .15s;
+}
+.tab.active { border-color:var(--pink); color:#c026a0; background:#fff0f6; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- HEADER -->
+  <div class="header">
+    <span class="header-icon">🍄</span>
+    <h1>Romeo & Juliet PQ<br>跳台協作工具</h1>
+    <p>楓之谷 Artale · 多人即時同步</p>
+    <div class="online-badge" id="online-badge">🌐 連線中...</div>
+    <div class="deco-strip">🌸🌷🌼🍄🌸🌷🌼🍄🌸🌷🌼🍄🌸🌷🌼🍄🌸🌷🌼🍄🌸🌷🌼🍄🌸🌷🌼🍄🌸🌷🌼🍄</div>
+  </div>
+
+  <!-- LOBBY -->
+  <div id="lobby">
+    <div class="pbox" style="padding:20px">
+      <div class="section-title">✨ 設定暱稱</div>
+      <div class="input-row">
+        <input type="text" id="nickname-input" placeholder="輸入你的遊戲暱稱" maxlength="16">
+        <button class="btn btn-pink" onclick="setNickname()">確定</button>
+      </div>
+    </div>
+
+    <div class="pbox" style="padding:20px">
+      <div class="section-title">🏠 建立房間</div>
+      <div class="input-row">
+        <input type="text" id="create-room-id" placeholder="房間代碼（留空自動產生）" maxlength="8">
+        <input type="password" id="create-room-pw" placeholder="密碼（可選）" maxlength="16">
+        <button class="btn btn-yellow" onclick="createRoom()">建立房間</button>
+      </div>
+    </div>
+
+    <div class="pbox" style="padding:20px">
+      <div class="section-title">🚪 加入房間</div>
+      <div class="input-row">
+        <input type="text" id="join-room-id" placeholder="房間代碼" maxlength="8">
+        <input type="password" id="join-room-pw" placeholder="密碼（若有）" maxlength="16">
+        <button class="btn btn-blue" onclick="joinRoom()">加入</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROOM VIEW -->
+  <div id="room-view" class="hidden">
+
+    <!-- Room bar -->
+    <div class="room-info-bar">
+      <span style="font-family:'Press Start 2P';font-size:8px;color:var(--muted)">房間：</span>
+      <span class="room-code" id="room-code-display" onclick="copyRoomLink()" title="點擊複製邀請連結">🔗 載入中</span>
+      <span style="font-size:11px;color:var(--muted)" id="room-pw-hint"></span>
+      <div style="flex:1"></div>
+      <button class="btn btn-sm btn-red" onclick="leaveRoom()">離開房間</button>
+    </div>
+
+    <!-- Members -->
+    <div class="pbox" style="padding:16px;margin-bottom:16px;">
+      <div class="section-title">👾 房間成員</div>
+      <div class="members-grid" id="members-grid"></div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('map')">🗺️ 地圖標記</div>
+      <div class="tab" onclick="switchTab('overview')">📋 路線總覽</div>
+      <div class="tab" onclick="switchTab('log')">📜 系統日誌</div>
+    </div>
+
+    <!-- Map tab -->
+    <div id="tab-map">
+      <div class="pbox" style="padding:16px;margin-bottom:16px;">
+        <div class="map-header">
+          <div class="section-title" style="flex:1">🗺️ 跳台地圖</div>
+          <button class="btn btn-sm btn-red" onclick="clearMyMarks()">清除我的標記</button>
+        </div>
+        <div style="display:flex">
+          <div class="floor-labels" id="floor-labels"></div>
+          <div class="grid-area">
+            <div class="col-headers">
+              <div class="col-header">A</div>
+              <div class="col-header">B</div>
+              <div class="col-header">C</div>
+              <div class="col-header">D</div>
+            </div>
+            <div id="map-grid"></div>
+          </div>
+        </div>
+      </div>
+      <div class="legend pbox">
+        <div class="legend-item"><div class="legend-dot" style="background:#f472b622;border-color:#f472b6"></div>玩家1</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#34d39922;border-color:#34d399"></div>玩家2</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#fbbf2422;border-color:#fbbf24"></div>玩家3</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#60a5fa22;border-color:#60a5fa"></div>玩家4</div>
+        <div class="legend-item" style="margin-left:auto;font-size:11px;color:var(--muted)">左鍵=通路 ✓ | 右鍵=死路 ✕</div>
+      </div>
+    </div>
+
+    <!-- Overview tab -->
+    <div id="tab-overview" class="hidden">
+      <div class="pbox" style="padding:16px;">
+        <div class="section-title">📋 路線總覽</div>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:14px;">根據目前標記自動推導每位成員的通關路線，點擊數字可複製整條路線。</p>
+        <div id="overview-content"></div>
+      </div>
+    </div>
+
+    <!-- Log tab -->
+    <div id="tab-log" class="hidden">
+      <div class="pbox" style="padding:16px;">
+        <div class="section-title">📜 系統日誌</div>
+        <div class="log-box" id="log-box"><p>系統初始化...</p></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- NAME MODAL -->
+<div class="modal-bg" id="name-modal">
+  <div class="modal">
+    <h2>🍄 歡迎來到<br>羅朱跳台協作工具</h2>
+    <div style="margin-bottom:16px;">
+      <input type="text" id="modal-nickname" placeholder="輸入你的暱稱" maxlength="16" style="width:100%;text-align:center;font-size:16px;">
+    </div>
+    <button class="btn btn-pink" style="width:100%" onclick="modalSetNickname()">✨ 開始使用</button>
+  </div>
+</div>
+
+<!-- Firebase -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, set, get, onValue, off, update, remove, push, serverTimestamp }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig = {
+  databaseURL: "https://artale-2cbaf-default-rtdb.firebaseio.com"
+};
+const app = initializeApp(firebaseConfig);
+const db  = getDatabase(app);
+
+// ── STATE ────────────────────────────────────────────────
+const FLOORS = 10, COLS = 4;
+const PLAYER_COLORS = ['#f472b6','#34d399','#fbbf24','#60a5fa'];
+const PLAYER_EMOJI  = ['🗡️','🏹','🪄','🛡️'];
+
+let myId       = 'u_' + Math.random().toString(36).slice(2,8);
+let myNick     = '';
+let mySlot     = -1;   // 0-3
+let roomId     = '';
+let roomPw     = '';
+let isHost     = false;
+let roomRef    = null;
+let marksRef   = null;
+let membersRef = null;
+let roomState  = { members:{}, marks:{} };
+let listeners  = [];
+
+// ── UI HELPERS ───────────────────────────────────────────
+function toast(msg, dur=2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), dur);
+}
+function log(msg) {
+  const box = document.getElementById('log-box');
+  const p = document.createElement('p');
+  p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+  box.appendChild(p);
+  box.scrollTop = box.scrollHeight;
+}
+function switchTab(name) {
+  ['map','overview','log'].forEach(n=>{
+    document.getElementById('tab-'+n).classList.toggle('hidden', n!==name);
+  });
+  document.querySelectorAll('.tab').forEach((t,i)=>{
+    t.classList.toggle('active', ['map','overview','log'][i]===name);
+  });
+  if (name==='overview') renderOverview();
+}
+
+// ── NICKNAME ─────────────────────────────────────────────
+window.modalSetNickname = function() {
+  const v = document.getElementById('modal-nickname').value.trim();
+  if (!v) return toast('請輸入暱稱！');
+  myNick = v;
+  document.getElementById('name-modal').classList.add('hidden');
+  log('歡迎，' + myNick + '！');
+};
+window.setNickname = function() {
+  const v = document.getElementById('nickname-input').value.trim();
+  if (!v) return toast('請輸入暱稱！');
+  myNick = v;
+  toast('暱稱設定：' + myNick);
+};
+document.getElementById('modal-nickname').addEventListener('keydown', e=>{
+  if(e.key==='Enter') window.modalSetNickname();
+});
+
+// ── ROOM ─────────────────────────────────────────────────
+function genId() { return Math.random().toString(36).slice(2,7).toUpperCase(); }
+
+window.createRoom = async function() {
+  if (!myNick) return toast('請先設定暱稱！');
+  const customId = document.getElementById('create-room-id').value.trim().toUpperCase() || genId();
+  const pw = document.getElementById('create-room-pw').value.trim();
+  roomId = customId; roomPw = pw; isHost = true;
+  const snap = await get(ref(db, 'rooms/'+roomId));
+  if (snap.exists()) return toast('房間代碼已存在，請換一個');
+  await set(ref(db,'rooms/'+roomId), {
+    host: myId, pw: pw, created: Date.now(), marks: {}
+  });
+  await joinRoomInternal();
+};
+
+window.joinRoom = async function() {
+  if (!myNick) return toast('請先設定暱稱！');
+  const id = document.getElementById('join-room-id').value.trim().toUpperCase();
+  const pw = document.getElementById('join-room-pw').value.trim();
+  if (!id) return toast('請輸入房間代碼');
+  const snap = await get(ref(db,'rooms/'+id));
+  if (!snap.exists()) return toast('找不到房間：' + id);
+  const data = snap.val();
+  if (data.pw && data.pw !== pw) return toast('密碼錯誤！');
+  roomId = id; roomPw = pw; isHost = false;
+  await joinRoomInternal();
+};
+
+async function joinRoomInternal() {
+  // assign slot
+  const membSnap = await get(ref(db,'rooms/'+roomId+'/members'));
+  const existing = membSnap.val() || {};
+  const takenSlots = Object.values(existing).map(m=>m.slot);
+  let slot = -1;
+  for(let i=0;i<4;i++) { if(!takenSlots.includes(i)){slot=i;break;} }
+  if (slot===-1) return toast('房間已滿（最多4人）');
+  mySlot = slot;
+
+  await set(ref(db,'rooms/'+roomId+'/members/'+myId), {
+    nick: myNick, slot, online: true, joined: Date.now()
+  });
+
+  // presence
+  const presRef = ref(db,'rooms/'+roomId+'/members/'+myId+'/online');
+  // onDisconnect not available in modular easily, use workaround
+  window.addEventListener('beforeunload', ()=>{
+    set(presRef, false);
+  });
+
+  roomRef    = ref(db,'rooms/'+roomId);
+  membersRef = ref(db,'rooms/'+roomId+'/members');
+  marksRef   = ref(db,'rooms/'+roomId+'/marks');
+
+  // show room view
+  document.getElementById('lobby').classList.add('hidden');
+  document.getElementById('room-view').classList.remove('hidden');
+  document.getElementById('room-code-display').textContent = '🔗 ' + roomId;
+  const pwHint = roomPw ? `🔒 ${roomPw}` : '🔓 無密碼';
+  document.getElementById('room-pw-hint').textContent = pwHint;
+
+  buildGrid();
+  listenMembers();
+  listenMarks();
+  log('已加入房間 ' + roomId + '，你是玩家' + (mySlot+1));
+  toast('已加入房間！你是玩家' + (mySlot+1) + ' ' + PLAYER_EMOJI[mySlot]);
+  updateOnlineBadge();
+}
+
+window.leaveRoom = async function() {
+  if (!roomId) return;
+  await set(ref(db,'rooms/'+roomId+'/members/'+myId+'/online'), false);
+  listeners.forEach(([r,fn])=>off(r,fn));
+  listeners=[];
+  roomId=''; mySlot=-1; isHost=false;
+  roomState={members:{},marks:{}};
+  document.getElementById('room-view').classList.add('hidden');
+  document.getElementById('lobby').classList.remove('hidden');
+  toast('已離開房間');
+  log('離開房間');
+  updateOnlineBadge();
+};
+
+window.copyRoomLink = function() {
+  const link = location.href.split('?')[0]+'?room='+roomId+(roomPw?'&pw='+roomPw:'');
+  navigator.clipboard.writeText(link).then(()=>toast('邀請連結已複製！'));
+};
+
+function updateOnlineBadge() {
+  const cnt = Object.values(roomState.members).filter(m=>m.online).length;
+  document.getElementById('online-badge').textContent = roomId
+    ? `🌐 房間：${roomId} | ${cnt} 人在線`
+    : '🌐 未在房間';
+}
+
+// ── LISTENERS ────────────────────────────────────────────
+function listenMembers() {
+  const fn = onValue(membersRef, snap=>{
+    roomState.members = snap.val() || {};
+    renderMembers();
+    updateOnlineBadge();
+  });
+  listeners.push([membersRef, fn]);
+}
+function listenMarks() {
+  const fn = onValue(marksRef, snap=>{
+    roomState.marks = snap.val() || {};
+    renderAllCells();
+  });
+  listeners.push([marksRef, fn]);
+}
+
+// ── MEMBERS RENDER ───────────────────────────────────────
+function renderMembers() {
+  const grid = document.getElementById('members-grid');
+  const members = roomState.members;
+  let html='';
+  for(let s=0;s<4;s++){
+    const m = Object.values(members).find(m=>m.slot===s);
+    const color = PLAYER_COLORS[s];
+    const emoji = PLAYER_EMOJI[s];
+    const isMe = m && Object.keys(members).find(k=>members[k]===m)===myId;
+    if(m){
+      const online = m.online;
+      html+=`<div class="member-card${isMe?' me':''}" style="border-color:${online?color:'#555'}">
+        <div class="member-avatar" style="color:${online?color:'#555'};font-size:22px">${emoji}</div>
+        <div class="member-info">
+          <div class="member-name" style="color:${online?color:'#888'}">${m.nick}${isMe?' (我)':''}</div>
+          <div class="member-role">玩家 ${s+1} · ${online?'在線':'離線'}</div>
+        </div>
+      </div>`;
+    } else {
+      html+=`<div class="member-card" style="opacity:.4">
+        <div class="member-avatar" style="color:#555;font-size:22px">${emoji}</div>
+        <div class="member-info">
+          <div class="member-name" style="color:#555">等待加入...</div>
+          <div class="member-role">玩家 ${s+1} · 空位</div>
+        </div>
+      </div>`;
+    }
+  }
+  grid.innerHTML=html;
+}
+
+// ── GRID ─────────────────────────────────────────────────
+function buildGrid() {
+  const grid  = document.getElementById('map-grid');
+  const flabs = document.getElementById('floor-labels');
+  grid.innerHTML=''; flabs.innerHTML='';
+  for(let f=0;f<FLOORS;f++){
+    const label = document.createElement('div');
+    label.className='floor-label';
+    label.textContent= (FLOORS-f)+'F';
+    flabs.appendChild(label);
+
+    const row = document.createElement('div');
+    row.className='grid-row';
+    for(let c=0;c<COLS;c++){
+      const cell = document.createElement('div');
+      cell.className='cell';
+      cell.id=`cell-${f}-${c}`;
+      cell.addEventListener('click', ()=>markCell(f,c,'pass'));
+      cell.addEventListener('contextmenu', e=>{e.preventDefault();markCell(f,c,'dead');});
+      // touch double tap
+      let lastTap=0;
+      cell.addEventListener('touchend', e=>{
+        e.preventDefault();
+        const now=Date.now();
+        if(now-lastTap<300){markCell(f,c,'dead');}
+        else{markCell(f,c,'pass');}
+        lastTap=now;
+      });
+      row.appendChild(cell);
+    }
+    grid.appendChild(row);
+  }
+}
+
+function markCell(floor, col, type) {
+  const key = `f${floor}_c${col}`;
+  const existing = (roomState.marks[key] || {})[myId];
+
+  // toggle logic
+  let newType = type;
+  if(existing === type) newType = null; // toggle off
+
+  // pass: only one per floor per player
+  if(newType==='pass'){
+    // clear other pass on same floor for me
+    for(let c=0;c<COLS;c++){
+      const k=`f${floor}_c${c}`;
+      if(c!==col && roomState.marks[k] && roomState.marks[k][myId]==='pass'){
+        remove(ref(db,'rooms/'+roomId+'/marks/'+k+'/'+myId));
+      }
+    }
+  }
+
+  const markPath = `rooms/${roomId}/marks/${key}/${myId}`;
+  if(newType===null){
+    remove(ref(db,markPath));
+  } else {
+    set(ref(db,markPath), newType);
+  }
+}
+
+function renderAllCells() {
+  for(let f=0;f<FLOORS;f++){
+    for(let c=0;c<COLS;c++){
+      renderCell(f,c);
+    }
+  }
+}
+
+function renderCell(floor, col) {
+  const cell = document.getElementById(`cell-${floor}-${col}`);
+  if(!cell) return;
+  const key  = `f${floor}_c${col}`;
+  const data = roomState.marks[key] || {};
+
+  // find pass mark
+  const passEntry = Object.entries(data).find(([,v])=>v==='pass');
+  const deadEntries = Object.entries(data).filter(([,v])=>v==='dead');
+
+  cell.innerHTML='';
+  cell.className='cell';
+  cell.style.background='';
+  cell.style.borderColor='';
+  cell.style.borderWidth='';
+
+  if(passEntry){
+    const [uid] = passEntry;
+    const m = Object.values(roomState.members).find((_,i)=>Object.keys(roomState.members)[i]===uid);
+    const slot = m ? m.slot : 0;
+    const color = PLAYER_COLORS[slot] || '#fff';
+    cell.style.background = color+'22';
+    cell.style.borderColor = color;
+    cell.style.borderWidth = '3px';
+    cell.classList.add('marked');
+    const mark = document.createElement('div');
+    mark.className='cell-mark';
+    mark.textContent='✓';
+    mark.style.color=color;
+    cell.appendChild(mark);
+    if(m){
+      const name = document.createElement('div');
+      name.className='cell-name';
+      name.textContent=m.nick;
+      name.style.color=color+'cc';
+      cell.appendChild(name);
+    }
+  }
+
+  if(deadEntries.length>0){
+    const dots = document.createElement('div');
+    dots.className='cell-dots';
+    deadEntries.forEach(([uid])=>{
+      const m = Object.values(roomState.members).find((_,i)=>Object.keys(roomState.members)[i]===uid);
+      const slot = m?m.slot:0;
+      const dot = document.createElement('div');
+      dot.className='cell-dot';
+      dot.style.background=PLAYER_COLORS[slot];
+      dots.appendChild(dot);
+    });
+    if(!passEntry){
+      cell.style.background='#ff6b6b11';
+      const mark = document.createElement('div');
+      mark.className='cell-mark';
+      mark.style.color='#ff6b6b66';
+      mark.textContent='✕';
+      cell.appendChild(mark);
+    }
+    cell.appendChild(dots);
+  }
+}
+
+// ── CLEAR ────────────────────────────────────────────────
+window.clearMyMarks = async function() {
+  const updates={};
+  for(let f=0;f<FLOORS;f++){
+    for(let c=0;c<COLS;c++){
+      updates[`f${f}_c${c}/${myId}`]=null;
+    }
+  }
+  await update(ref(db,'rooms/'+roomId+'/marks'), updates);
+  toast('已清除我的所有標記');
+};
+
+// ── OVERVIEW ─────────────────────────────────────────────
+function renderOverview() {
+  const members = roomState.members;
+  const marks   = roomState.marks;
+  const slots   = [0,1,2,3];
+  const memberBySlot = {};
+  Object.entries(members).forEach(([uid,m])=>{ memberBySlot[m.slot]={uid,...m}; });
+
+  let html='<table class="overview-table"><thead><tr><th>玩家</th>';
+  for(let f=0;f<FLOORS;f++) html+=`<th>${FLOORS-f}F</th>`;
+  html+='<th>複製</th></tr></thead><tbody>';
+
+  slots.forEach(s=>{
+    const m = memberBySlot[s];
+    const color = PLAYER_COLORS[s];
+    const route=[];
+    for(let f=0;f<FLOORS;f++){
+      let found=-1;
+      for(let c=0;c<COLS;c++){
+        const key=`f${f}_c${c}`;
+        if(marks[key] && m && marks[key][m.uid]==='pass') found=c;
+      }
+      // auto-deduce: if 3 dead in floor for this player, remaining is pass
+      if(found===-1 && m){
+        const dead=[];
+        for(let c=0;c<COLS;c++){
+          const key=`f${f}_c${c}`;
+          if(marks[key] && marks[key][m.uid]==='dead') dead.push(c);
+        }
+        if(dead.length===3){
+          found=[0,1,2,3].find(c=>!dead.includes(c));
+        }
+      }
+      route.push(found===-1?'?':['A','B','C','D'][found]);
+    }
+
+    html+=`<tr><td><span style="color:${color};font-weight:700">${m?m.nick:'空位'}</span></td>`;
+    route.forEach(r=>{
+      const bg = r==='?'?'#55555522':color+'22';
+      const bc = r==='?'?'#555':color;
+      html+=`<td><div class="route-cell"><span class="route-num" style="background:${bg};border-color:${bc};color:${r==='?'?'#555':color}">${r}</span></div></td>`;
+    });
+    const routeStr = route.join('→');
+    html+=`<td><button class="btn btn-sm btn-green" onclick="navigator.clipboard.writeText('${routeStr}').then(()=>window.showToast('已複製！'))">複製</button></td>`;
+    html+='</tr>';
+  });
+  html+='</tbody></table>';
+  document.getElementById('overview-content').innerHTML=html;
+}
+
+window.showToast = toast;
+
+// ── URL PARAMS ───────────────────────────────────────────
+(()=>{
+  const p = new URLSearchParams(location.search);
+  const r = p.get('room'), pw = p.get('pw');
+  if(r){
+    document.getElementById('join-room-id').value=r;
+    if(pw) document.getElementById('join-room-pw').value=pw;
+  }
+})();
+
+// check nickname on load
+window.addEventListener('load',()=>{
+  // show modal
+});
+
+</script>
+</body>
+</html>
